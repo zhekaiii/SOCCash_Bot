@@ -52,8 +52,7 @@ def me(update, context):
 def reset(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
-    if not legitUser(user_id):
-        context.bot.sendMessage(chat_id, 'You are not an authorized user!')
+    if accessDenied(update, context):
         return
     msg = context.bot.sendMessage(chat_id, 'Please wait a moment...')
     try:
@@ -65,8 +64,7 @@ def reset(update, context):
 def addadmin(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
-    if not legitUser(user_id):
-        context.bot.sendMessage(chat_id, 'You are not an authorized user!')
+    if accessDenied(update, context):
         return
     toAdd = update.message.text.split(' ')
     added = []
@@ -84,8 +82,7 @@ def addadmin(update, context):
 def factoryreset(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
-    if not legitUser(user_id):
-        context.bot.sendMessage(chat_id, 'You are not an authorized user!')
+    if accessDenied(update, context):
         return
     markup = InlineKeyboardMarkup([
         [
@@ -98,8 +95,7 @@ def factoryreset(update, context):
 def display(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
-    if not legitUser(user_id):
-        context.bot.sendMessage(chat_id, 'You are not an authorized user!')
+    if accessDenied(update, context):
         return
     markup = InlineKeyboardMarkup(
         [
@@ -114,8 +110,7 @@ def display(update, context):
 def add(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
-    if not legitUser(user_id):
-        context.bot.sendMessage(chat_id, 'You are not an authorized user!')
+    if accessDenied(update, context):
         return
     args = update.message.text.strip().split(' ')[1:]
     if len(args) < 2 or not args[-1].isnumeric():
@@ -144,8 +139,7 @@ def add(update, context):
 def massadd(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
-    if not legitUser(user_id):
-        context.bot.sendMessage(chat_id, 'You are not an authorized user!')
+    if accessDenied(update, context):
         return
     args = update.message.text.strip().split(' ')[1:]
     if len(args) != 1 or not args[0].isnumeric():
@@ -158,8 +152,7 @@ def massadd(update, context):
 def help(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
-    if not legitUser(user_id):
-        context.bot.sendMessage(chat_id, 'You are not an authorized user! Please type /me and send your user id to any admin so they can add you.')
+    if accessDenied(update, context):
         return
     txt = '/me - Sends you your user id. Required to add as admin\n\n'
     txt += '/addadmin <u>userid(s)</u> - Adds the following user(s) as an admin. Separate user ids with a space\n\n'
@@ -175,6 +168,14 @@ def testfn(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
     context.bot.sendMessage(chat_id, getHouses())
+
+def accessDenied(update, context):
+    user_id = update.message.from_user.id
+    chat_id = update.message.chat.id
+    if not legitUser(user_id):
+        context.bot.sendMessage(chat_id, 'You are not an authorized user! To get added as an admin, please type /me and send your user id to any admin so they can add you.')
+        return True
+    return False
 
 def full_name(effective_user):
     first_name = effective_user.first_name
