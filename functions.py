@@ -41,7 +41,7 @@ def start(update, context):
     if legitUser(user_id):
         context.bot.sendMessage(chat_id, f'Hi, {full_name(user)}. You are an authorized user.')
     else:
-        context.bot.sendMessage(chat_id, 'Welcome to the SOCCash bot! Type /me to get your user id.')
+        context.bot.sendMessage(chat_id, 'Welcome to the SOCCash bot! To be added as an admin, type /me to get your user id and then send that to an existing admin.')
 
 def me(update, context):
     user = update.message.from_user
