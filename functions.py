@@ -191,9 +191,7 @@ def help(update, context):
     context.bot.sendMessage(chat_id, txt, parse_mode = ParseMode.HTML)
 
 def testfn(update, context):
-    user_id = update.message.from_user.id
-    chat_id = update.message.chat.id
-    context.bot.sendMessage(chat_id, getHouses())
+    resetdb()
 
 def accessDenied(update, context):
     user_id = update.message.from_user.id
