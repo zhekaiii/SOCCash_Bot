@@ -162,7 +162,7 @@ def help(update, context):
         context.bot.sendMessage(chat_id, 'You are not an authorized user! Please type /me and send your user id to any admin so they can add you.')
         return
     txt = '/me - Sends you your user id. Required to add as admin\n\n'
-    txt += '/addadmin <u>userid</u> - Adds the following user as an admin\n\n'
+    txt += '/addadmin <u>userid(s)</u> - Adds the following user(s) as an admin. Separate user ids with a space\n\n'
     txt += '/add <u>OG(s)</u> <u>amount</u> - Adds the specified amount of SOCCash to the OG(s) specified. Works for one or more OGs at a time.\n'
     txt += 'e.g. If you want to add $10 to Aikon 3 and Barg 2, type /add A3 B2 10. Upper/Lowercase does not matter.\n\n'
     txt += '/massadd <u>amount</u> - Adds the specified amount of SOCCash to all OGs\n\n'
