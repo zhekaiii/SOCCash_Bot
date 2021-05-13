@@ -20,7 +20,7 @@ if test:
 else:
 	TOKEN = os.environ['TELEGRAM_TOKEN']
 	DB_URL = os.environ['DATABASE_URL']
-	PORT = int(os.environ.get('PORT', 5000))
+	PORT = int(os.environ.get('PORT', 8443))
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -57,8 +57,12 @@ def main():
     if test:
     	updater.start_polling()
     else:
-    	updater.start_webhook(listen='0.0.0.0', port = PORT, url_path = TOKEN)
-    	updater.bot.setWebhook('https://soccash-bot.herokuapp.com/' + TOKEN)
+    	updater.start_webhook(
+			listen='0.0.0.0',
+			port = PORT,
+			url_path = TOKEN,
+			webhook_url = 'https://soccash-bot.herokuapp.com/' + TOKEN
+		)
     # updater.bot.sendMessage(ic1_id, 'Up and running!') # got too annoying
     with ExitStack() as stack:
     	stack.callback(partial(updater.bot.sendMessage, 129464681, 'closed'))
