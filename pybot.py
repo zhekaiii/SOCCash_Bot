@@ -65,7 +65,6 @@ def main():
 		)
     # updater.bot.sendMessage(ic1_id, 'Up and running!') # got too annoying
     with ExitStack() as stack:
-    	stack.callback(partial(updater.bot.sendMessage, 129464681, 'closed'))
     	stack.callback(con.close)
     	stack.callback(cur.close)
     	updater.idle()
