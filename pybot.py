@@ -4,7 +4,6 @@ from telegram.ext import Updater, Filters, CommandHandler, MessageHandler, Callb
 
 # Bot Functions
 from functions import *
-from db import resetdb
 
 # Random Stuff
 import os, logging
