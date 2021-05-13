@@ -50,7 +50,6 @@ def main():
 	dp.add_handler(CommandHandler('add', add))
 	dp.add_handler(CommandHandler('help', help))
 	dp.add_handler(CommandHandler('massadd', massadd))
-	dp.add_handler(CommandHandler('test', testfn))
 	dp.add_handler(CommandHandler('revoke', revoke))
 	dp.add_handler(MessageHandler(Filters.forwarded, forwarded))
 	dp.add_handler(CallbackQueryHandler(button))
@@ -67,9 +66,6 @@ def main():
 			webhook_url = 'https://soccash-bot.herokuapp.com/' + TOKEN
 		)
 	# updater.bot.sendMessage(ic1_id, 'Up and running!') # got too annoying
-	cur.execute("SELECT FROM information_schema.tables WHERE table_name = 'users'")
-	if cur.fetchall() is None:
-		resetdb()
 	with ExitStack() as stack:
 		stack.callback(con.close)
 		stack.callback(cur.close)

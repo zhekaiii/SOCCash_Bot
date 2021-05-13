@@ -190,9 +190,6 @@ def help(update, context):
     txt += '/factoryreset - Resets the SOCCash amount to 0 for ALL OGs and removes all admins. USE WITH CAUTION!\n\n'
     context.bot.sendMessage(chat_id, txt, parse_mode = ParseMode.HTML)
 
-def testfn(update, context):
-    resetdb()
-
 def accessDenied(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
