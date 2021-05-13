@@ -36,38 +36,40 @@ def error(update, context):
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 def main():
-    updater = Updater(TOKEN, request_kwargs={'read_timeout': 20, 'connect_timeout': 20}, use_context=True)
-    dp = updater.dispatcher
+	updater = Updater(TOKEN, request_kwargs={'read_timeout': 20, 'connect_timeout': 20}, use_context=True)
+	dp = updater.dispatcher
 
     # Handlers
-    dp.add_handler(CommandHandler('start', start))
-    dp.add_handler(CommandHandler('me', me))
-    dp.add_handler(CommandHandler('addadmin', addadmin))
-    dp.add_handler(CommandHandler('reset', reset))
-    dp.add_handler(CommandHandler('factoryreset', factoryreset))
-    dp.add_handler(CommandHandler('display', display))
-    dp.add_handler(CommandHandler('add', add))
-    dp.add_handler(CommandHandler('help', help))
-    dp.add_handler(CommandHandler('massadd', massadd))
-    dp.add_handler(CommandHandler('test', testfn))
-    dp.add_handler(CallbackQueryHandler(button))
-    dp.add_error_handler(error)
+	dp.add_handler(CommandHandler('start', start))
+	dp.add_handler(CommandHandler('me', me))
+	dp.add_handler(CommandHandler('addadmin', addadmin))
+	dp.add_handler(CommandHandler('reset', reset))
+	dp.add_handler(CommandHandler('factoryreset', factoryreset))
+	dp.add_handler(CommandHandler('display', display))
+	dp.add_handler(CommandHandler('add', add))
+	dp.add_handler(CommandHandler('help', help))
+	dp.add_handler(CommandHandler('massadd', massadd))
+	dp.add_handler(CommandHandler('test', testfn))
+	dp.add_handler(CommandHandler('revoke', revoke))
+	dp.add_handler(MessageHandler(Filters.forwarded, forwarded))
+	dp.add_handler(CallbackQueryHandler(button))
+	dp.add_error_handler(error)
 
     # Set Webhook
-    if test:
-    	updater.start_polling()
-    else:
-    	updater.start_webhook(
+	if test:
+		updater.start_polling()
+	else:
+		updater.start_webhook(
 			listen='0.0.0.0',
 			port = PORT,
 			url_path = TOKEN,
 			webhook_url = 'https://soccash-bot.herokuapp.com/' + TOKEN
 		)
-    # updater.bot.sendMessage(ic1_id, 'Up and running!') # got too annoying
-    with ExitStack() as stack:
-    	stack.callback(con.close)
-    	stack.callback(cur.close)
-    	updater.idle()
+	# updater.bot.sendMessage(ic1_id, 'Up and running!') # got too annoying
+	with ExitStack() as stack:
+		stack.callback(con.close)
+		stack.callback(cur.close)
+		updater.idle()
 
 if __name__ == '__main__':
     main()

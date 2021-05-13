@@ -55,10 +55,10 @@ def legitUser(chat_id):
     cur.execute(f"SELECT * FROM users WHERE chat_id = {chat_id}")
     return cur.fetchone() is not None
 
-def adduser(chat_id):
-    with ExitStack() as stack:
-        stack.callback(con.commit)
-        cur.execute(f'INSERT INTO users (chat_id) VALUES ({chat_id})')
+def addUser(chat_id):
+    cur.execute(f'INSERT INTO users (chat_id) VALUES ({chat_id}) ON CONFLICT DO NOTHING RETURNING 1')
+    con.commit()
+    return cur.fetchone() is not None
 
 def getHouse(house_id):
     cur.execute(f'SELECT name FROM house WHERE id = {house_id}')
@@ -91,7 +91,7 @@ def addPoints(og_list, amt):
     where = []
     for og in og_list:
         og_id = int(og[1])
-        house = og[0]
+        house = og[0].upper()
         where.append(f"(og.id = {og_id} AND name LIKE '{house}%')")
         query += f"UPDATE og o SET points = points + {amt} WHERE EXISTS (SELECT 1 FROM og JOIN house ON (o.house_id = house.id) WHERE o.id = {og_id} AND name LIKE '{house}%');\n"
     with ExitStack() as stack:
@@ -107,3 +107,13 @@ def getHouses():
 def addAll(amt):
     cur.execute(f'UPDATE og SET points = points + {amt}')
     con.commit()
+
+def getAdmins():
+    cur.execute('SELECT chat_id FROM users')
+    return [user[0] for user in cur.fetchall()]
+
+def revokeAdmin(idList):
+    idList = [str(i) for i in idList]
+    where = f'({",".join(idList)})'
+    cur.execute(f'DELETE FROM users WHERE chat_id IN {where} RETURNING *')
+    return [user[0] for user in cur.fetchall()]
