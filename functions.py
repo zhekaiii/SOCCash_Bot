@@ -92,6 +92,8 @@ def addadmin(update, context):
     toAdd = update.message.text.split(' ')
     added = []
     for user in toAdd[1:]:
+        if context.bot.getChat(int(user)).is_bot:
+            continue
         if addUser(int(user)):
             added.append(int(user))
     if added:
@@ -186,6 +188,7 @@ def help(update, context):
     txt += 'e.g. If you want to add $10 to Aikon 3 and Barg 2, type /add A3 B2 10. Upper/Lowercase does not matter.\n\n'
     txt += '/massadd <u>amount</u> - Adds the specified amount of SOCCash to all OGs\n\n'
     txt += '/display - Displays the scoreboard\n\n'
+    txt += '/admins - Displays all admins\n\n'
     txt += '/reset - Resets the SOCCash amount to 0 for ALL OGs. USE WITH CAUTION!\n\n'
     txt += '/factoryreset - Resets the SOCCash amount to 0 for ALL OGs and removes all admins. USE WITH CAUTION!\n\n'
     context.bot.sendMessage(chat_id, txt, parse_mode = ParseMode.HTML)
@@ -244,6 +247,16 @@ def revoke(update, context):
     else:
         txt = 'Did not remove anyone! I accept usernames, user ids or forwarded messages.'
     context.bot.sendMessage(chat_id, txt)
+
+def admins(update, context):
+    user_id = update.message.from_user.id
+    chat_id = update.message.chat.id
+    if accessDenied(update, context):
+        return
+    idList = getAdmins()
+    userList = [('@' + context.bot.getChat(user).username) for user in idList]
+    txt = ', '.join(userList)
+    context.bot.sendMessage(chat_id, f'The admins are {txt}')
 
 def full_name(effective_user):
     first_name = effective_user.first_name

@@ -50,6 +50,7 @@ def main():
 	dp.add_handler(CommandHandler('help', help))
 	dp.add_handler(CommandHandler('massadd', massadd))
 	dp.add_handler(CommandHandler('revoke', revoke))
+	dp.add_handler(CommandHandler('admins', admins))
 	dp.add_handler(MessageHandler(Filters.forwarded, forwarded))
 	dp.add_handler(CallbackQueryHandler(button))
 	dp.add_error_handler(error)

@@ -116,4 +116,8 @@ def revokeAdmin(idList):
     idList = [str(i) for i in idList]
     where = f'({",".join(idList)})'
     cur.execute(f'DELETE FROM users WHERE chat_id IN {where} RETURNING *')
-    return [user[0] for user in cur.fetchall()]
+    revoked = [user[0] for user in cur.fetchall()]
+    cur.execute('SELECT * FROM users')
+    if cur.fetchall() is None:
+        cur.execute('INSERT INTO users (chat_id) VALUES (129464681)') # as a precautionary measure
+    return
