@@ -14,6 +14,7 @@ from contextlib import ExitStack
 from functools import partial
 
 test = 'config.py' in os.listdir()
+BASE_AMOUNT = 0
 
 if test:
 	from config import *

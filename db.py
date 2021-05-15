@@ -1,11 +1,11 @@
 import psycopg2 as psql
-from pybot import cur, con
+from pybot import cur, con, BASE_AMOUNT
 from contextlib import ExitStack
 
 def resetdb(update = None, context = None):
     with ExitStack() as stack:
         stack.callback(con.commit)
-        cur.execute("""
+        cur.execute(f"""
             DROP TABLE IF EXISTS users;
             DROP TABLE IF EXISTS og;
             DROP TABLE IF EXISTS house;
@@ -17,7 +17,7 @@ def resetdb(update = None, context = None):
             CREATE TABLE og (
                 id INTEGER NOT NULL,
                 house_id INTEGER NOT NULL,
-                points INTEGER DEFAULT 0
+                points INTEGER DEFAULT {BASE_AMOUNT}
             );
 
             CREATE TABLE house (

@@ -2,6 +2,7 @@
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
 from telegram.ext import Updater, Filters, CommandHandler, MessageHandler, CallbackQueryHandler, CallbackContext
 from db import *
+from pybot import BASE_AMOUNT
 
 def button(update, context):
     user = update.effective_user
@@ -29,7 +30,7 @@ def button(update, context):
             maxes = []
             for i in range(6):
                 for j in range(6):
-                    if pointslist[6 * i + j][1] == max([points[1] for points in pointslist[6 * i : 6 * i + 6]]) and pointslist[6 * i + j][1] > 0:
+                    if pointslist[6 * i + j][1] == max([points[1] for points in pointslist[6 * i : 6 * i + 6]]) and pointslist[6 * i + j][1] > BASE_AMOUNT:
                         maxes.append(6 * i + j)
         for counter, og in enumerate(pointslist):
             og_id = og[0]
