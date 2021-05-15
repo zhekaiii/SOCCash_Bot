@@ -206,6 +206,9 @@ def forwarded(update, context):
     chat_id = update.message.chat.id
     if not legitUser(user_id):
         return
+    if update.message.forward_from is None:
+        context.bot.sendMessage(chat_id, f'Due to {update.message.forward_sender_name}\'s privacy settings, I cannot add them. Get them to PM me /me and send you their user id!')
+        return
     if update.message.forward_from == context.bot.get_me():
         context.bot.sendMessage(chat_id, 'You cannot make me an admin!')
         return
