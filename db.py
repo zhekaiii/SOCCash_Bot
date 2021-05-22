@@ -120,4 +120,5 @@ def revokeAdmin(idList):
     cur.execute('SELECT * FROM users')
     if cur.fetchall() is None:
         cur.execute('INSERT INTO users (chat_id) VALUES (129464681)') # as a precautionary measure
-    return
+    con.commit()
+    return revoked
