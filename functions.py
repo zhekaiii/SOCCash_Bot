@@ -2,7 +2,7 @@
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
 from telegram.ext import Updater, Filters, CommandHandler, MessageHandler, CallbackQueryHandler, CallbackContext
 from db import *
-from pybot import BASE_AMOUNT
+from pybot import BASE_AMOUNT, logger
 
 def button(update, context):
     user = update.effective_user
