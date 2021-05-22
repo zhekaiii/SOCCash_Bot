@@ -94,7 +94,7 @@ def addadmin(update, context):
     added = []
     for user in toAdd[1:]:
         print
-        if context.bot.getChat(int(user)).get_member(int(user)).is_bot:
+        if context.bot.getChat(int(user)).get_member(int(user)).user.is_bot:
             continue
         if addUser(int(user)):
             added.append(int(user))
