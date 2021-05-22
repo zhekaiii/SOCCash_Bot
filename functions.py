@@ -99,7 +99,7 @@ def addadmin(update, context):
             added.append(int(user))
     if added:
         added = [f'@{context.bot.getChat(user).username}' for user in added]
-        context.bot.sendMessage(chat_id, f'Added @{", ".join(added)} as admin successfully!')
+        context.bot.sendMessage(chat_id, f'Added {", ".join(added)} as admin successfully!')
     else:
         context.bot.sendMessage(chat_id, 'Failed to add anyone. Are they already admin?')
 
