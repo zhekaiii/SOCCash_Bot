@@ -93,14 +93,14 @@ def addadmin(update, context):
     toAdd = update.message.text.split(' ')
     added = []
     for user in toAdd[1:]:
-        print
         if context.bot.getChat(int(user)).get_member(int(user)).user.is_bot:
             continue
         if addUser(int(user)):
             added.append(int(user))
     if added:
         added = [f'@{user}' for user in added]
-        context.bot.sendMessage(chat_id, f'Added @{", ".join([context.bot.getChat(user).username for user in added])} as admin successfully!')
+        logger.warning(added)
+        context.bot.sendMessage(chat_id, f'Added @{", ".join([context.bot.getChat(user).get_member(user).user.username for user in added])} as admin successfully!')
     else:
         context.bot.sendMessage(chat_id, 'Failed to add anyone. Are they already admin?')
 
