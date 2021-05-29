@@ -1,10 +1,8 @@
 import psycopg2 as psql
-from pybot import cur, con, BASE_AMOUNT
-from contextlib import ExitStack
+from pybot import cur, con, logger, BASE_AMOUNT
 
 def resetdb(update = None, context = None):
-    with ExitStack() as stack:
-        stack.callback(con.commit)
+    try:
         cur.execute(f"""
             DROP TABLE IF EXISTS users;
             DROP TABLE IF EXISTS og;
@@ -46,9 +44,12 @@ def resetdb(update = None, context = None):
                     VALUES
                         ({og_id}, {house_id})
                 """)
+    except Exception as e:
+        con.rollback()
+        raise e
 
 def resetpoints():
-    cur.execute("UPDATE og SET points = 0")
+    cur.execute(f"UPDATE og SET points = {BASE_AMOUNT}")
     con.commit()
 
 def legitUser(chat_id):
@@ -77,9 +78,9 @@ def getPoints(house_id = None, og_id = None, mode = 'house'):
     else:
         order = 'ORDER BY points DESC'
     cur.execute(f'''
-    SELECT og.id, points, name
-    FROM og
-    JOIN house ON (og.house_id = house.id)
+        SELECT og.id, points, name
+        FROM og
+        JOIN house ON (og.house_id = house.id)
     {where} {order}
     ''')
     return cur.fetchall()
@@ -94,9 +95,11 @@ def addPoints(og_list, amt):
         house = og[0].upper()
         where.append(f"(og.id = {og_id} AND name LIKE '{house}%')")
         query += f"UPDATE og o SET points = points + {amt} WHERE EXISTS (SELECT 1 FROM og JOIN house ON (o.house_id = house.id) WHERE o.id = {og_id} AND name LIKE '{house}%');\n"
-    with ExitStack() as stack:
-        stack.callback(con.commit)
+    try:
         cur.execute(query)
+    except Exception as e:
+        con.rollback()
+        raise e
     cur.execute(f"SELECT og.id, house.name, og.points FROM og JOIN house on (house_id = house.id) WHERE {' OR '.join(where)}")
     return cur.fetchall()
 
