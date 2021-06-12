@@ -185,7 +185,7 @@ def help(update, context):
     txt = 'Forward a message from a user to add/remove them as admin\n\n'
     txt += '/me - Sends you your user id. Required to add as admin\n\n'
     txt += '/addadmin <u>userid(s)</u> - Adds the following user(s) as an admin. Separate user ids with a space\n\n'
-    txt += '/revoke <u>usernames/user ids</u> - Revokes admin privilegs from the following people. Unlike /addadmin, this works with usernames'
+    txt += '/revoke <u>usernames/user ids</u> - Revokes admin privilegs from the following people. Unlike /addadmin, this works with usernames\n\n'
     txt += '/add <u>OG(s)</u> <u>amount</u> - Adds the specified amount of SOCCash to the OG(s) specified. Works for one or more OGs at a time.\n'
     txt += 'e.g. If you want to add $10 to Aikon 3 and Barg 2, type /add A3 B2 10. Upper/Lowercase does not matter.\n\n'
     txt += '/massadd <u>amount</u> - Adds the specified amount of SOCCash to all OGs\n\n'
