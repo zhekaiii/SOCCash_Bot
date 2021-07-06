@@ -185,7 +185,7 @@ def add(update, context):
     if not valid:
         msg.edit_text('Failed to add to any OG. Please check your format.')
         return
-    res = addPoints(valid, amt)
+    res = addPoints(valid, amt, user_id)
     og_list = [f'{i[1]} {i[0]}' for i in res]
     points = [i[2] for i in res]
     txt = f'Done! Added ${amt} to {", ".join(og_list)}. Run /display to see the scoreboard.'
@@ -207,7 +207,7 @@ def massadd(update, context):
             chat_id, 'Invalid format! If you want to give every OG $10, do /massadd 10')
         return
     amt = int(args[0])
-    addAll(amt)
+    addAll(amt, user_id)
     context.bot.sendMessage(
         chat_id, f'Succeessfully added ${amt} to every OG!')
 

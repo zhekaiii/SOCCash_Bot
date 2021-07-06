@@ -127,8 +127,11 @@ def getHouses():
     return [i[0][0] for i in cur.fetchall()]
 
 
-def addAll(amt):
-    cur.execute(f'UPDATE og SET points = points + {amt}')
+def addAll(amt, user_id):
+    cur.execute(f'''
+    UPDATE og SET points = points + {amt};
+    INSERT INTO logs (chat_id, amount) VALUES ({user_id}, {amt});
+    ''')
     con.commit()
 
 
