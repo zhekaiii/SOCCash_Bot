@@ -111,7 +111,7 @@ def addPoints(og_list, amt, user_id):
         house = og[0].upper()
         where.append(f"(og.id = {og_id} AND name LIKE '{house}%')")
         query += f"UPDATE og o SET points = points + {amt} WHERE EXISTS (SELECT 1 FROM og JOIN house ON (o.house_id = house.id) WHERE o.id = {og_id} AND name LIKE '{house}%');\n"
-        query += f"INSERT INTO logs (chat_id, amount, og_id, house_id) VALUES ({user_id}, {amt}, {og_id}, (SELECT id FROM house WHERE name LIKE '{house}'))"
+        query += f"INSERT INTO logs (chat_id, amount, og_id, house_id) VALUES ({user_id}, {amt}, {og_id}, (SELECT id FROM house WHERE name LIKE '{house}'));\n"
     try:
         cur.execute(query)
     except Exception as e:
