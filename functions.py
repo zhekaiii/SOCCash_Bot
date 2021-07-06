@@ -60,7 +60,7 @@ def button(update, context):
         ocomm = callback_data.split('.')[2] == 'ocomm'
         addUser(id, ocomm)
         msg.edit_text(
-            f'Done! @{context.bot.getChat(id).username} is now an {"admin" if ocomm else "station master"}!')
+            f'Done! @{context.bot.getChat(id).username} is now a{"n admin" if ocomm else " station master"}!')
     elif callback_data.startswith('revoke'):
         msg = context.bot.edit_message_text(
             'Revoking, please hold on...', chat_id, message_id)
@@ -279,7 +279,9 @@ def forwarded(update, context):
                 InlineKeyboardButton(
                     'OComm', callback_data=f'add.{forwardedFrom.id}.ocomm'),
                 InlineKeyboardButton(
-                    'Station Master', callback_data=f'add.{forwardedFrom.id}.sm'),
+                    'Station Master', callback_data=f'add.{forwardedFrom.id}.sm')
+            ],
+            [
                 InlineKeyboardButton('Cancel', callback_data='cancel')
             ]
         ])
