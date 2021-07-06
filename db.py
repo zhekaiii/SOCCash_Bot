@@ -79,9 +79,12 @@ def getHouse(house_id):
     cur.execute(f'SELECT name FROM house WHERE id = {house_id}')
     return cur.fetchone()[0]
 
+
 def getlogs():
-    cur.execute('SELECT chat_id, og_id, house_id, amount FROM logs ORDER BY time')
+    cur.execute(
+        'SELECT chat_id, og_id, house_id, amount FROM logs ORDER BY time')
     return cur.fetchall()
+
 
 def getPoints(house_id=None, og_id=None, mode='house'):
     where = ''
@@ -114,9 +117,10 @@ def addPoints(og_list, amt, user_id):
         house = og[0].upper()
         where.append(f"(og.id = {og_id} AND name LIKE '{house}%')")
         query += f"UPDATE og o SET points = points + {amt} WHERE EXISTS (SELECT 1 FROM og JOIN house ON (o.house_id = house.id) WHERE o.id = {og_id} AND name LIKE '{house}%');\n"
-        query += f"INSERT INTO logs (chat_id, amount, og_id, house_id) VALUES ({user_id}, {amt}, {og_id}, (SELECT id FROM house WHERE name LIKE '{house}'));\n"
+        query += f"INSERT INTO logs (chat_id, amount, og_id, house_id) VALUES ({user_id}, {amt}, {og_id}, (SELECT id FROM house WHERE name LIKE '{house}%'));\n"
     try:
         cur.execute(query)
+        con.commit()
     except Exception as e:
         con.rollback()
         raise e

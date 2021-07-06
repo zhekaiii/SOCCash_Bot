@@ -323,19 +323,22 @@ def admins(update, context):
     txt = ', '.join(userList)
     context.bot.sendMessage(chat_id, f'The admins are {txt}')
 
+
 def log(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
     if accessDenied(update, context):
         return
+
+    msg = context.bot.sendMessage(chat_id, "Retrieving logs...")
     logs = getlogs()
     txt = ''
     for lg in logs:
         uid, og_id, house_id, amount = lg
         txt += f'@{context.bot.getChat(uid).username} added {amount} to {"all OGs" if og_id is None and house_id is None else f"{getHouse(house_id)} {og_id}"}\n'
-        
-    context.bot.sendMessage(chat_id, txt)
-    
+
+    msg.edit_text(txt)
+
 
 def full_name(effective_user):
     first_name = effective_user.first_name
