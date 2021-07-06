@@ -1,7 +1,8 @@
 import psycopg2 as psql
 from pybot import cur, con, logger, BASE_AMOUNT
 
-def resetdb(update = None, context = None):
+
+def resetdb(update=None, context=None):
     try:
         cur.execute(f"""
             DROP TABLE IF EXISTS users;
@@ -10,6 +11,7 @@ def resetdb(update = None, context = None):
 
             CREATE TABLE users (
                 chat_id INTEGER NOT NULL PRIMARY KEY UNIQUE
+                role INTEGER DEFAULT 0
             );
 
             CREATE TABLE og (
@@ -48,24 +50,37 @@ def resetdb(update = None, context = None):
         con.rollback()
         raise e
 
+
 def resetpoints():
     cur.execute(f"UPDATE og SET points = {BASE_AMOUNT}")
     con.commit()
+
 
 def legitUser(chat_id):
     cur.execute(f"SELECT * FROM users WHERE chat_id = {chat_id}")
     return cur.fetchone() is not None
 
-def addUser(chat_id):
-    cur.execute(f'INSERT INTO users (chat_id) VALUES ({chat_id}) ON CONFLICT DO NOTHING RETURNING 1')
+
+def isOComm(chat_id):
+    cur.execute(
+        f"SELECT (role IS 0) AS isOcomm FROM users WHERE chat_id = {chat_id}")
+    res = cur.fetchone()
+    return res[0] if res else False
+
+
+def addUser(chat_id, ocomm):
+    cur.execute(
+        f'INSERT INTO users (chat_id, role) VALUES ({chat_id}, {0 if ocomm else 1}) ON CONFLICT DO NOTHING RETURNING 1')
     con.commit()
     return cur.fetchone() is not None
+
 
 def getHouse(house_id):
     cur.execute(f'SELECT name FROM house WHERE id = {house_id}')
     return cur.fetchone()[0]
 
-def getPoints(house_id = None, og_id = None, mode = 'house'):
+
+def getPoints(house_id=None, og_id=None, mode='house'):
     where = ''
     order = ''
     if house_id and og_id:
@@ -85,7 +100,8 @@ def getPoints(house_id = None, og_id = None, mode = 'house'):
     ''')
     return cur.fetchall()
 
-def addPoints(og_list, amt):
+
+def addPoints(og_list, amt, user_id):
     if not og_list:
         return
     query = ''
@@ -95,25 +111,31 @@ def addPoints(og_list, amt):
         house = og[0].upper()
         where.append(f"(og.id = {og_id} AND name LIKE '{house}%')")
         query += f"UPDATE og o SET points = points + {amt} WHERE EXISTS (SELECT 1 FROM og JOIN house ON (o.house_id = house.id) WHERE o.id = {og_id} AND name LIKE '{house}%');\n"
+        query += f"INSERT INTO logs (chat_id, amount, og_id, house_id) VALUES ({user_id}, {amt}, {og_id}, (SELECT id FROM house WHERE name LIKE '{house}'))"
     try:
         cur.execute(query)
     except Exception as e:
         con.rollback()
         raise e
-    cur.execute(f"SELECT og.id, house.name, og.points FROM og JOIN house on (house_id = house.id) WHERE {' OR '.join(where)}")
+    cur.execute(
+        f"SELECT og.id, house.name, og.points FROM og JOIN house on (house_id = house.id) WHERE {' OR '.join(where)}")
     return cur.fetchall()
+
 
 def getHouses():
     cur.execute('SELECT name FROM house')
     return [i[0][0] for i in cur.fetchall()]
 
+
 def addAll(amt):
     cur.execute(f'UPDATE og SET points = points + {amt}')
     con.commit()
 
+
 def getAdmins():
     cur.execute('SELECT chat_id FROM users')
     return [user[0] for user in cur.fetchall()]
+
 
 def revokeAdmin(idList):
     idList = [str(i) for i in idList]
@@ -122,6 +144,7 @@ def revokeAdmin(idList):
     revoked = [user[0] for user in cur.fetchall()]
     cur.execute('SELECT * FROM users')
     if cur.fetchall() is None:
-        cur.execute('INSERT INTO users (chat_id) VALUES (129464681)') # as a precautionary measure
+        # as a precautionary measure
+        cur.execute('INSERT INTO users (chat_id) VALUES (129464681)')
     con.commit()
     return revoked
