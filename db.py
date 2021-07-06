@@ -79,6 +79,9 @@ def getHouse(house_id):
     cur.execute(f'SELECT name FROM house WHERE id = {house_id}')
     return cur.fetchone()[0]
 
+def getlogs():
+    cur.execute('SELECT chat_id, og_id, house_id, amount FROM logs ORDER BY time')
+    return cur.fetchall()
 
 def getPoints(house_id=None, og_id=None, mode='house'):
     where = ''
