@@ -264,7 +264,16 @@ def forwarded(update, context):
     forwardedFrom = update.message.forward_from
     legit = legitUser(forwardedFrom.id)
     if legit:
-        txt = f'@{forwardedFrom.username} is already an admin. Do  you want to revoke their admin privileges?'
+        markup = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton(
+                    'Yes', callback_data=f'revoke.{forwardedFrom.id}'),
+                InlineKeyboardButton('Cancel', callback_data='cancel')
+
+            ]
+        ])
+    else:
+        txt = f'@{forwardedFrom.username} is already an admin. Do you want to revoke their admin privileges?'
         markup = InlineKeyboardMarkup([
             [
                 InlineKeyboardButton(
@@ -272,15 +281,6 @@ def forwarded(update, context):
                 InlineKeyboardButton(
                     'Station Master', callback_data=f'add.{forwardedFrom.id}.sm'),
                 InlineKeyboardButton('Cancel', callback_data='cancel')
-            ]
-        ])
-    else:
-        markup = InlineKeyboardMarkup([
-            [
-                InlineKeyboardButton(
-                    'Yes', callback_data=f'revoke.{forwardedFrom.id}'),
-                InlineKeyboardButton('Cancel', callback_data='cancel')
-
             ]
         ])
         txt = f'Do you want to add @{forwardedFrom.username} as admin?'
