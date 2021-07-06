@@ -63,7 +63,7 @@ def legitUser(chat_id):
 
 def isOComm(chat_id):
     cur.execute(
-        f"SELECT (role IS 0) AS isOcomm FROM users WHERE chat_id = {chat_id}")
+        f"SELECT (role = 0) AS isOcomm FROM users WHERE chat_id = {chat_id}")
     res = cur.fetchone()
     return res[0] if res else False
 
