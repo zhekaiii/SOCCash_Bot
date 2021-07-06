@@ -94,7 +94,7 @@ def me(update, context):
 def reset(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
-    if accessDenied(update, context):
+    if accessDenied(update, context) or not isOComm(user_id):
         return
     msg = context.bot.sendMessage(chat_id, 'Please wait a moment...')
     try:
@@ -131,7 +131,7 @@ def addadmin(update, context):
 def factoryreset(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
-    if accessDenied(update, context):
+    if accessDenied(update, context) or not isOComm(user_id):
         return
     markup = InlineKeyboardMarkup([
         [
@@ -245,7 +245,7 @@ def accessDenied(update, context):
 def forwarded(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
-    if not legitUser(user_id):
+    if not isOComm(user_id):
         return
     if update.message.forward_from is None:
         context.bot.sendMessage(
@@ -292,7 +292,7 @@ def forwarded(update, context):
 def revoke(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
-    if accessDenied(update, context):
+    if accessDenied(update, context) or not isOComm(user_id):
         return
     args = update.message.text.strip().split(' ')[1:]
     idList = getAdmins()
@@ -316,18 +316,25 @@ def revoke(update, context):
 def admins(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
-    if accessDenied(update, context):
+    if accessDenied(update, context) or not isOComm(user_id):
         return
     idList = getAdmins()
-    userList = [('@' + context.bot.getChat(user).username) for user in idList]
+    userList = []
+    failcount = 0
+    for user in idList:
+        try:
+            userList.append('@' + context.bot.getChat(user).username)
+        except:
+            failcount += 1
     txt = ', '.join(userList)
-    context.bot.sendMessage(chat_id, f'The admins are {txt}')
+    context.bot.sendMessage(
+        chat_id, f'The admins are {txt}' + (f' and {failcount} others' if failcount else ''))
 
 
 def log(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
-    if accessDenied(update, context):
+    if accessDenied(update, context) or not isOComm(user_id):
         return
 
     msg = context.bot.sendMessage(chat_id, "Retrieving logs...")
@@ -335,7 +342,7 @@ def log(update, context):
     txt = ''
     for lg in logs:
         uid, og_id, house_id, amount = lg
-        txt += f'@{context.bot.getChat(uid).username} added {amount} to {"all OGs" if og_id is None and house_id is None else f"{getHouse(house_id)} {og_id}"}\n'
+        txt += f'@{context.bot.getChat(uid).username} added ${amount} to {"all OGs" if og_id is None and house_id is None else f"{getHouse(house_id)} {og_id}"}\n'
 
     msg.edit_text(txt)
 
