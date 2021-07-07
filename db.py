@@ -52,7 +52,7 @@ def resetdb(update=None, context=None):
 
 
 def resetpoints():
-    cur.execute(f"UPDATE og SET points = {BASE_AMOUNT}")
+    cur.execute(f"UPDATE og SET points = {BASE_AMOUNT}; DELETE FROM logs;")
     con.commit()
 
 
