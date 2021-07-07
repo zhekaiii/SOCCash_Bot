@@ -355,7 +355,7 @@ def log(update, context):
         except:
             un = "Someone"
             print(uid)
-        txt += f'{un} {"added" if amount > 0 else "removed"} ${amount} to {"all OGs" if og_id is None and house_id is None else f"{getHouse(house_id)} {og_id}"}\n'
+        txt += f'{un} {"added" if amount > 0 else "removed"} ${amount if amount > 0 else -amount} to {"all OGs" if og_id is None and house_id is None else f"{getHouse(house_id)} {og_id}"}\n'
 
     msg.edit_text(txt)
 
