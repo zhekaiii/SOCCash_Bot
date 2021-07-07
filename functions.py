@@ -161,13 +161,21 @@ def display(update, context):
         chat_id, 'How would you like to display?', reply_markup=markup)
 
 
+def isNumber(x):
+    try:
+        int(x)
+        return True
+    except:
+        return False
+
+
 def add(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
     if accessDenied(update, context):
         return
     args = update.message.text.strip().upper().split(' ')[1:]
-    if len(args) < 2 or not args[-1].isnumeric():
+    if len(args) < 2 or not isNumber(args[-1]):
         context.bot.sendMessage(
             chat_id, 'Invalid format! If you want to add $10 to Aikon 3 and Barg 2, type /add A3 B2 10. Upper/Lowercase does not matter.')
         return
@@ -188,7 +196,7 @@ def add(update, context):
     res = addPoints(valid, amt, user_id)
     og_list = [f'{i[1]} {i[0]}' for i in res]
     points = [i[2] for i in res]
-    txt = f'Done! Added ${amt} to {", ".join(og_list)}. Run /display to see the scoreboard.'
+    txt = f'Done! {"Added" if amt > 0 else "Removed"} ${amt if amt > 0 else -amt} to {", ".join(og_list)}. Run /display to see the scoreboard.'
     for i, p in enumerate(points):
         txt += f'\n{og_list[i]}: ${p}'
     if invalid:
@@ -342,7 +350,12 @@ def log(update, context):
     txt = ''
     for lg in logs:
         uid, og_id, house_id, amount = lg
-        txt += f'@{context.bot.getChat(uid).username} added ${amount} to {"all OGs" if og_id is None and house_id is None else f"{getHouse(house_id)} {og_id}"}\n'
+        try:
+            un = "@" + context.bot.getChat(uid).username
+        except:
+            un = "Someone"
+            print(uid)
+        txt += f'{un} {"added" if amount > 0 else "removed"} ${amount} to {"all OGs" if og_id is None and house_id is None else f"{getHouse(house_id)} {og_id}"}\n'
 
     msg.edit_text(txt)
 
