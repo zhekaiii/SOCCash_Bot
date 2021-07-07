@@ -347,11 +347,15 @@ def log(update, context):
 
     msg = context.bot.sendMessage(chat_id, "Retrieving logs...")
     logs = getlogs()
+    userlist = {}
     txt = ''
     for lg in logs:
         uid, og_id, house_id, amount = lg
         try:
-            un = "@" + context.bot.getChat(uid).username
+            if userlist.get(uid, 0) == 0:
+                un = "@" + context.bot.getChat(uid).username
+            else:
+                un = "@" + userlist[uid]
         except:
             un = "Someone"
             print(uid)
