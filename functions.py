@@ -196,7 +196,7 @@ def add(update, context):
     res = addPoints(valid, amt, user_id)
     og_list = [f'{i[1]} {i[0]}' for i in res]
     points = [i[2] for i in res]
-    txt = f'Done! {"Added" if amt > 0 else "Removed"} ${amt if amt > 0 else -amt} to {", ".join(og_list)}. Run /display to see the scoreboard.'
+    txt = f'Done! {"Added" if amt > 0 else "Removed"} ${amt if amt > 0 else -amt} {"to" if amt > 0 else "from"} {", ".join(og_list)}. Run /display to see the scoreboard.'
     for i, p in enumerate(points):
         txt += f'\n{og_list[i]}: ${p}'
     if invalid:
@@ -359,7 +359,7 @@ def log(update, context):
         except:
             un = "Someone"
             print(uid)
-        txt += f'{un} {"added" if amount > 0 else "removed"} ${amount if amount > 0 else -amount} to {"all OGs" if og_id is None and house_id is None else f"{getHouse(house_id)} {og_id}"}\n'
+        txt += f'{un} {"added" if amount > 0 else "removed"} ${amount if amount > 0 else -amount} {"to" if amount > 0 else "from"} {"all OGs" if og_id is None and house_id is None else f"{getHouse(house_id)} {og_id}"}\n'
 
     msg.edit_text(txt)
 
