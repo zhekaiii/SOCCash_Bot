@@ -43,12 +43,12 @@ def button(update, context):
             points = og[1]
             if counter % 6 == 0:
                 if mode == 'house':
-                    txt += f'\n\n<u>{house} Total: {sum([i[1] for i in pointslist[counter:counter + 6]])}</u>'
+                    txt += f'\n\n<u>{house} Total: ${sum([i[1] for i in pointslist[counter:counter + 6]])}</u>'
                 else:
                     txt += '\n'
             if mode == 'house' and counter in maxes:
                 txt += '<b>'
-            txt += f'\n{house} {og_id}: ${points}'
+            txt += f'\n{house} {og_id}: ${points}' if counter % 6 == 0 else ''
             if mode == 'house' and counter in maxes:
                 txt += f' (Top {house} contributor!)</b>'
         context.bot.edit_message_text(
@@ -148,17 +148,26 @@ def display(update, context):
     chat_id = update.message.chat.id
     if accessDenied(update, context):
         return
-    markup = InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton('By house', callback_data='disphouse'),
-                InlineKeyboardButton('In descending order',
-                                     callback_data='dispdsc')
-            ]
-        ]
-    )
+    # markup = InlineKeyboardMarkup(
+    #     [
+    #         [
+    #             InlineKeyboardButton('By house', callback_data='disphouse'),
+    #             InlineKeyboardButton('In descending order',
+    #                                  callback_data='dispdsc')
+    #         ]
+    #     ]
+    # )
+    # context.bot.sendMessage(
+    #     chat_id, 'How would you like to display?', reply_markup=markup)
+    txt = '<u>Amount of SOCCash</u>'
+    pointslist = getPoints(mode="dsc")
+    for og in pointslist:
+        og_id = og[0]
+        house = og[2]
+        points = og[1]
+        txt += f'\n{house} {og_id}: ${points}'
     context.bot.sendMessage(
-        chat_id, 'How would you like to display?', reply_markup=markup)
+        chat_id, txt, parse_mode=ParseMode.HTML)
 
 
 def isNumber(x):
@@ -349,6 +358,8 @@ def log(update, context):
     logs = getlogs()
     userlist = {}
     txt = ''
+    if not logs:
+        txt = 'Log is empty'
     for lg in logs:
         uid, og_id, house_id, amount = lg
         try:
