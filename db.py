@@ -84,7 +84,7 @@ def getlogs(page=0):
     cur.execute('SELECT COUNT(*) FROM logs')
     count = cur.fetchone()[0]
     if count == 0:
-        return None
+        return [0, None]
     cur.execute(
         f'''SELECT chat_id, og_id, house_id, amount, time
         FROM logs
