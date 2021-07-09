@@ -80,10 +80,19 @@ def getHouse(house_id):
     return cur.fetchone()[0]
 
 
-def getlogs():
+def getlogs(page=0):
+    cur.execute('SELECT COUNT(*) FROM logs')
+    count = cur.fetchone()[0]
+    if count == 0:
+        return None
     cur.execute(
-        'SELECT chat_id, og_id, house_id, amount FROM logs ORDER BY time')
-    return cur.fetchall()
+        f'''SELECT chat_id, og_id, house_id, amount, time
+        FROM logs
+        ORDER BY time
+        OFFSET {page * 20}
+        LIMIT 20''')
+    res = cur.fetchall()
+    return [count, res] if res else [0, None]
 
 
 def getPoints(house_id=None, og_id=None, mode='house'):

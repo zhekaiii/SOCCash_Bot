@@ -3,6 +3,7 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, ParseMo
 from telegram.ext import Updater, Filters, CommandHandler, MessageHandler, CallbackQueryHandler, CallbackContext
 from db import *
 from pybot import BASE_AMOUNT, logger
+import datetime
 
 
 def button(update, context):
@@ -10,6 +11,8 @@ def button(update, context):
     user_id = user.id
     chat_id = update.effective_chat.id
     message_id = update.callback_query['message']['message_id']
+    original_text = update.callback_query['message']['text']
+    original_markup = update.callback_query['message']['reply_markup']['inline_keyboard']
     if not legitUser(user_id):
         return
     callback_data = update.callback_query['data']
@@ -68,6 +71,28 @@ def button(update, context):
         revokeAdmin([id])
         msg.edit_text(
             f'Done! @{context.bot.getChat(id).username} is no longer an admin!')
+    elif callback_data.startswith('log'):
+        context.bot.edit_message_text("Loading...", chat_id, message_id)
+        page_no = int(callback_data.split('.')[1])
+        count, logs = getlogs(page_no)
+        if not logs:
+            om = InlineKeyboardMarkup(
+                [[InlineKeyboardButton(button['text'], callback_data=button['callback_data']) for button in row] for row in original_markup])
+            context.bot.edit_message_text(
+                original_text, chat_id, message_id, reply_markup=om)
+            context.bot.answer_callback_query(
+                update.callback_query.id, "No more logs to view!")
+            return
+        txt = generate_logs(logs, context)
+        buttons = []
+        if page_no > 0:
+            buttons.append(InlineKeyboardButton(
+                "Previous", callback_data=f"log.{page_no-1}"))
+        if count > (page_no + 1) * 20:
+            buttons.append(InlineKeyboardButton(
+                "Next", callback_data=f"log.{page_no+1}"))
+        context.bot.edit_message_text(
+            txt, chat_id, message_id, reply_markup=InlineKeyboardMarkup([buttons]))
 
 
 def start(update, context):
@@ -355,24 +380,36 @@ def log(update, context):
         return
 
     msg = context.bot.sendMessage(chat_id, "Retrieving logs...")
-    logs = getlogs()
-    userlist = {}
+    count, logs = getlogs(0)
     txt = ''
-    if not logs:
+    if count == 0:
         txt = 'Log is empty'
+    txt = generate_logs(logs, context)
+    markup = None
+    if count > 20:
+        markup = InlineKeyboardMarkup(
+            [[InlineKeyboardButton("Next", callback_data="log.1")]])
+    msg.edit_text(txt, reply_markup=markup)
+
+
+def generate_logs(logs, context):
+    txt = ""
+    userlist = {}
     for lg in logs:
-        uid, og_id, house_id, amount = lg
+        uid, og_id, house_id, amount, time = lg
+        time = time.astimezone(datetime.timezone(datetime.timedelta(hours=8)))
+        timestr = f"{time.day}/{time.month} {time.hour}:{time.minute}"
         try:
             if userlist.get(uid, 0) == 0:
                 un = "@" + context.bot.getChat(uid).username
+                userlist[uid] = un
             else:
-                un = "@" + userlist[uid]
+                un = userlist[uid]
         except:
             un = "Someone"
             print(uid)
-        txt += f'{un} {"added" if amount > 0 else "removed"} ${amount if amount > 0 else -amount} {"to" if amount > 0 else "from"} {"all OGs" if og_id is None and house_id is None else f"{getHouse(house_id)} {og_id}"}\n'
-
-    msg.edit_text(txt)
+        txt += f'{timestr} {un} {"added" if amount > 0 else "removed"} ${amount if amount > 0 else -amount} {"to" if amount > 0 else "from"} {"all OGs" if og_id is None and house_id is None else f"{getHouse(house_id)} {og_id}"}\n'
+    return txt
 
 
 def full_name(effective_user):
