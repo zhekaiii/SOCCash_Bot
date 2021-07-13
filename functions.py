@@ -51,7 +51,7 @@ def button(update, context):
                     txt += '\n'
             if mode == 'house' and counter in maxes:
                 txt += '<b>'
-            txt += f'\n{house} {og_id}: ${points}' if counter % 6 == 0 else ''
+            txt += f'\n{house} {og_id}: ${points}'
             if mode == 'house' and counter in maxes:
                 txt += f' (Top {house} contributor!)</b>'
         context.bot.edit_message_text(
@@ -173,26 +173,17 @@ def display(update, context):
     chat_id = update.message.chat.id
     if accessDenied(update, context):
         return
-    # markup = InlineKeyboardMarkup(
-    #     [
-    #         [
-    #             InlineKeyboardButton('By house', callback_data='disphouse'),
-    #             InlineKeyboardButton('In descending order',
-    #                                  callback_data='dispdsc')
-    #         ]
-    #     ]
-    # )
-    # context.bot.sendMessage(
-    #     chat_id, 'How would you like to display?', reply_markup=markup)
-    txt = '<u>Amount of SOCCash</u>'
-    pointslist = getPoints(mode="dsc")
-    for og in pointslist:
-        og_id = og[0]
-        house = og[2]
-        points = og[1]
-        txt += f'\n{house} {og_id}: ${points}'
+    markup = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton('By house', callback_data='disphouse'),
+                InlineKeyboardButton('In descending order',
+                                     callback_data='dispdsc')
+            ]
+        ]
+    )
     context.bot.sendMessage(
-        chat_id, txt, parse_mode=ParseMode.HTML)
+        chat_id, 'How would you like to display?', reply_markup=markup)
 
 
 def isNumber(x):
@@ -306,6 +297,7 @@ def forwarded(update, context):
     forwardedFrom = update.message.forward_from
     legit = legitUser(forwardedFrom.id)
     if legit:
+        txt = f'@{forwardedFrom.username} is already an admin. Do you want to revoke their admin privileges?'
         markup = InlineKeyboardMarkup([
             [
                 InlineKeyboardButton(
@@ -315,7 +307,6 @@ def forwarded(update, context):
             ]
         ])
     else:
-        txt = f'@{forwardedFrom.username} is already an admin. Do you want to revoke their admin privileges?'
         markup = InlineKeyboardMarkup([
             [
                 InlineKeyboardButton(

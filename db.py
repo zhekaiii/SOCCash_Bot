@@ -111,7 +111,7 @@ def getPoints(house_id=None, og_id=None, mode='house'):
         SELECT og.id, points, name
         FROM og
         JOIN house ON (og.house_id = house.id)
-    {where} AND og.id = 1 {order}
+        {where} {order}
     ''')
     return cur.fetchall()
 
