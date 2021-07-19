@@ -49,7 +49,7 @@ def main():
     dp.add_handler(CommandHandler('me', me))
     dp.add_handler(CommandHandler('addadmin', addadmin))
     dp.add_handler(CommandHandler('reset', reset))
-    # dp.add_handler(CommandHandler('factoryreset', factoryreset))
+    dp.add_handler(CommandHandler('username', getusername))
     dp.add_handler(CommandHandler('display', display))
     dp.add_handler(CommandHandler('add', add))
     dp.add_handler(CommandHandler('help', help))
