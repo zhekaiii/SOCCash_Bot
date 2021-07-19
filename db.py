@@ -87,8 +87,9 @@ def getlogs(page=0):
     if count == 0:
         return [0, None]
     cur.execute(
-        f'''SELECT chat_id, og_id, house_id, amount, time
-        FROM logs
+        f'''SELECT u.username, og_id, house_id, amount, time
+        FROM logs l
+        LEFT JOIN users u ON u.chat_id = l.chat_id
         ORDER BY time
         OFFSET {page * 20}
         LIMIT 20''')
@@ -153,18 +154,20 @@ def addAll(amt, user_id):
 
 
 def getAdmins():
-    cur.execute('SELECT chat_id FROM users')
-    return [user[0] for user in cur.fetchall()]
+    cur.execute('SELECT chat_id, username, role FROM users')
+    return cur.fetchall()
 
 
 def revokeAdmin(idList):
-    idList = [str(i) for i in idList]
+    idList = [i for i in idList]
     where = f'({",".join(idList)})'
-    cur.execute(f'DELETE FROM users WHERE chat_id IN {where} RETURNING *')
-    revoked = [user[0] for user in cur.fetchall()]
+    cur.execute(
+        f'DELETE FROM users WHERE chat_id IN {where} RETURNING username')
+    revoked = [username[0] for username in cur.fetchall()]
     cur.execute('SELECT * FROM users')
     if cur.fetchall() is None:
         # as a precautionary measure
-        cur.execute('INSERT INTO users (chat_id) VALUES (129464681)')
+        cur.execute(
+            '''INSERT INTO users (chat_id, username) VALUES (129464681, 'zhekaiiii')''')
     con.commit()
     return revoked

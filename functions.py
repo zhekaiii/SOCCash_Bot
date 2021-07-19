@@ -156,9 +156,8 @@ def addadmin(update, context):
         if addUser(int(user), not sm, username):
             added.append(int(user))
     if added:
-        added = [f'@{context.bot.getChat(user).username}' for user in added]
         context.bot.sendMessage(
-            chat_id, f'Added {", ".join(added)} as {"station master" if sm else "admin"} successfully!')
+            chat_id, f'Added {len(added)} as {"station master" if sm else "admin"} successfully!')
     else:
         context.bot.sendMessage(
             chat_id, 'Failed to add anyone. Are they already admin?')
@@ -335,8 +334,8 @@ def forwarded(update, context):
 
 def getusername(update, context):
     chat_id = update.message.chat.id
-    idList = getAdmins()
-    for user in idList:
+    idList = list(filter(lambda x: x[1] == None, getAdmins()))
+    for user, _, _ in idList:
         try:
             username = context.bot.getChat(user).username
             cur.execute(
@@ -352,29 +351,18 @@ def revoke(update, context):
     if accessDenied(update, context) or not isOComm(user_id):
         return
     args = update.message.text.strip().split(' ')[1:]
-    idList = getAdmins()
-    userList = {}
-    for user in idList:
-        try:
-            userList[context.bot.getChat(user).username] = user
-        except:
-            pass
+    adminList = getAdmins()
+    userList = {user[1]: user[0] for user in adminList}
     valid = []
     for user in args:
-        if user.isnumeric() and int(user) in idList:
+        user = user.strip('@')
+        if user.isnumeric() and int(user) in userList.values():
             valid.append(user)
         elif user in userList.keys():
-            valid.append(userList[user])
+            valid.append(str(userList[user]))
     removed = revokeAdmin(valid) if len(valid) > 0 else []
     if removed:
-        removedusers = []
-        anon = 0
-        for user in removed:
-            try:
-                removedusers.append(context.bot.getChat(user).username)
-            except:
-                anon += 1
-        r = ', '.join(removedusers) + (f'and {anon} others' if anon else '')
+        r = ', '.join(removed)
         txt = f'Successfully removed {r}.'
     else:
         txt = 'Did not remove anyone! I accept usernames, user ids or forwarded messages.'
@@ -386,18 +374,13 @@ def admins(update, context):
     chat_id = update.message.chat.id
     if accessDenied(update, context) or not isOComm(user_id):
         return
-    idList = getAdmins()
-    print(idList)
-    userList = []
-    failcount = 0
-    for user in idList:
-        try:
-            userList.append('@' + context.bot.getChat(user).username)
-        except:
-            failcount += 1
-    txt = ', '.join(userList)
+    userList = getAdmins()
+    ocommList = filter(lambda x: x[2] == 0, userList)
+    smList = filter(lambda x: x[2] == 1, userList)
+    ocomm = ', '.join([('@' + user[1]) for user in ocommList])
+    sm = ', '.join([('@' + user[1]) for user in smList])
     context.bot.sendMessage(
-        chat_id, f'The admins are {txt}' + (f' and {failcount} others' if failcount else ''))
+        chat_id, f'The OComm are {ocomm}\n\nThe Station Masters are {sm}')
 
 
 def log(update, context):
@@ -421,22 +404,17 @@ def log(update, context):
 
 def generate_logs(logs, context):
     txt = ""
-    userlist = {}
     for lg in logs:
-        uid, og_id, house_id, amount, time = lg
+        un, og_id, house_id, amount, time = lg
         time = time.astimezone(datetime.timezone(datetime.timedelta(hours=8)))
-        timestr = f"{time.day}/{time.month} {time.hour}:{time.minute}"
-        try:
-            if userlist.get(uid, 0) == 0:
-                un = "@" + context.bot.getChat(uid).username
-                userlist[uid] = un
-            else:
-                un = userlist[uid]
-        except:
-            un = "Someone"
-            print(uid)
+        timestr = f"{time.day}/{time.month} {doubledigit(time.hour)}:{doubledigit(time.minute)}"
+        un = ('@' + un) if un else "Someone "
         txt += f'{timestr} {un} {"added" if amount > 0 else "removed"} ${amount if amount > 0 else -amount} {"to" if amount > 0 else "from"} {"all OGs" if og_id is None and house_id is None else f"{getHouse(house_id)} {og_id}"}\n'
     return txt
+
+
+def doubledigit(x):
+    return f'0{x}' if x < 10 else f'{x}'
 
 
 def full_name(effective_user):
