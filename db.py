@@ -68,9 +68,10 @@ def isOComm(chat_id):
     return res[0] if res else False
 
 
-def addUser(chat_id, ocomm):
+def addUser(chat_id, ocomm, username):
+    username = f"'{username}'" if username else 'NULL'
     cur.execute(
-        f'INSERT INTO users (chat_id, role) VALUES ({chat_id}, {0 if ocomm else 1}) ON CONFLICT DO NOTHING RETURNING 1')
+        f"INSERT INTO users (chat_id, role, username) VALUES ({chat_id}, {0 if ocomm else 1}, {username}) ON CONFLICT DO NOTHING RETURNING 1")
     con.commit()
     return cur.fetchone() is not None
 

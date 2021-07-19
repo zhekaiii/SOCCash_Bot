@@ -1,8 +1,9 @@
 # Telegram
+from collections import UserList
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
 from telegram.ext import Updater, Filters, CommandHandler, MessageHandler, CallbackQueryHandler, CallbackContext
 from db import *
-from pybot import BASE_AMOUNT, logger
+from pybot import BASE_AMOUNT, logger, cur, con
 import datetime
 
 
@@ -61,7 +62,12 @@ def button(update, context):
             'Adding, please hold on...', chat_id, message_id)
         id = int(callback_data.split('.')[1])
         ocomm = callback_data.split('.')[2] == 'ocomm'
-        addUser(id, ocomm)
+        username = None
+        try:
+            username = context.bot.getChat(id).username
+        except:
+            pass
+        addUser(id, ocomm, username)
         msg.edit_text(
             f'Done! @{context.bot.getChat(id).username} is now a{"n admin" if ocomm else " station master"}!')
     elif callback_data.startswith('revoke'):
@@ -134,7 +140,7 @@ def addadmin(update, context):
     chat_id = update.message.chat.id
     if accessDenied(update, context):
         return
-    toAdd = update.message.text.split(' ')
+    toAdd = update.message.text.split(' ')[1:]
     sm = toAdd[0].lower() == "sm"
     if sm:
         toAdd.pop(0)
@@ -142,7 +148,12 @@ def addadmin(update, context):
     for user in toAdd[1:]:
         if context.bot.getChat(int(user)).get_member(int(user)).user.is_bot:
             continue
-        if addUser(int(user), not sm):
+        username = None
+        try:
+            username = context.bot.getChat(user).username
+        except:
+            pass
+        if addUser(int(user), not sm, username):
             added.append(int(user))
     if added:
         added = [f'@{context.bot.getChat(user).username}' for user in added]
@@ -322,6 +333,19 @@ def forwarded(update, context):
     context.bot.sendMessage(chat_id, txt, reply_markup=markup)
 
 
+def getusername(update, context):
+    chat_id = update.message.chat.id
+    idList = getAdmins()
+    for user in idList:
+        try:
+            username = context.bot.getChat(user).username
+            cur.execute(
+                f"UPDATE users SET username = '{username}' WHERE chat_id = {user}")
+        except:
+            pass
+    context.bot.sendMessage(chat_id, "Done")
+
+
 def revoke(update, context):
     user_id = update.message.from_user.id
     chat_id = update.message.chat.id
@@ -329,17 +353,28 @@ def revoke(update, context):
         return
     args = update.message.text.strip().split(' ')[1:]
     idList = getAdmins()
-    userList = {context.bot.getChat(user).username: user for user in idList}
+    userList = {}
+    for user in idList:
+        try:
+            userList[context.bot.getChat(user).username] = user
+        except:
+            pass
     valid = []
     for user in args:
         if user.isnumeric() and int(user) in idList:
             valid.append(user)
         elif user in userList.keys():
             valid.append(userList[user])
-    removed = revokeAdmin(valid)
+    removed = revokeAdmin(valid) if len(valid) > 0 else []
     if removed:
-        r = ', '.join(
-            ['@' + context.bot.getChat(user).username for user in removed])
+        removedusers = []
+        anon = 0
+        for user in removed:
+            try:
+                removedusers.append(context.bot.getChat(user).username)
+            except:
+                anon += 1
+        r = ', '.join(removedusers) + (f'and {anon} others' if anon else '')
         txt = f'Successfully removed {r}.'
     else:
         txt = 'Did not remove anyone! I accept usernames, user ids or forwarded messages.'
@@ -352,6 +387,7 @@ def admins(update, context):
     if accessDenied(update, context) or not isOComm(user_id):
         return
     idList = getAdmins()
+    print(idList)
     userList = []
     failcount = 0
     for user in idList:
