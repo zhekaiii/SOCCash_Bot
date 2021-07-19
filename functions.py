@@ -145,8 +145,8 @@ def addadmin(update, context):
     if sm:
         toAdd.pop(0)
     added = []
-    for user in toAdd[1:]:
-        if context.bot.getChat(int(user)).get_member(int(user)).user.is_bot:
+    for user in toAdd:
+        if (not user.isnumeric()) or context.bot.getChat(int(user)).get_member(int(user)).user.is_bot:
             continue
         username = None
         try:
@@ -157,7 +157,7 @@ def addadmin(update, context):
             added.append(int(user))
     if added:
         context.bot.sendMessage(
-            chat_id, f'Added {len(added)} as {"station master" if sm else "admin"} successfully!')
+            chat_id, f'Added {len(added)} user as {"station master" if sm else "admin"} successfully!')
     else:
         context.bot.sendMessage(
             chat_id, 'Failed to add anyone. Are they already admin?')
