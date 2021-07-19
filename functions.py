@@ -362,6 +362,7 @@ def revoke(update, context):
             valid.append(str(userList[user]))
     removed = revokeAdmin(valid) if len(valid) > 0 else []
     if removed:
+        removed = ['@' + user for user in removed]
         r = ', '.join(removed)
         txt = f'Successfully removed {r}.'
     else:
