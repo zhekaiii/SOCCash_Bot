@@ -1,6 +1,8 @@
 import psycopg2 as psql
 from pybot import cur, con, logger, BASE_AMOUNT
 from config import mychatid, myusername
+mychatid = 0  # Your chat id, can use /me to find out
+myusername = ''  # Your username, without the @
 
 
 def resetdb(update=None, context=None):
