@@ -196,7 +196,7 @@ def display(update, context):
         chat_id, 'How would you like to display?', reply_markup=markup)
 
 
-def isNumber(x):
+def isNumber(x):  # because isnumeric() doesn't recognize negative numbers?
     try:
         int(x)
         return True
@@ -271,7 +271,6 @@ def help(update, context):
     txt += '/display - Displays the scoreboard\n\n'
     txt += '/admins - Displays all admins\n\n' if OComm else ''
     txt += '/reset - Resets the SOCCash amount to 0 for ALL OGs. USE WITH CAUTION!\n\n' if OComm else ''
-    txt += '/factoryreset - Resets the SOCCash amount to 0 for ALL OGs and removes all admins. USE WITH CAUTION!\n\n' if OComm else ''
     context.bot.sendMessage(chat_id, txt, parse_mode=ParseMode.HTML)
 
 
@@ -307,7 +306,7 @@ def forwarded(update, context):
     forwardedFrom = update.message.forward_from
     legit = legitUser(forwardedFrom.id)
     if legit:
-        txt = f'@{forwardedFrom.username} is already an admin. Do you want to revoke their admin privileges?'
+        txt = f'@{forwardedFrom.username} is already a registered {legit}. Do you want to revoke their admin privileges?'
         markup = InlineKeyboardMarkup([
             [
                 InlineKeyboardButton(
@@ -334,6 +333,8 @@ def forwarded(update, context):
 
 def getusername(update, context):
     chat_id = update.message.chat.id
+    msg = context.bot.sendMessage(
+        chat_id, "Hold on, this might take very long...")
     idList = list(filter(lambda x: x[1] == None, getAdmins()))
     for user, _, _ in idList:
         try:
@@ -342,7 +343,7 @@ def getusername(update, context):
                 f"UPDATE users SET username = '{username}' WHERE chat_id = {user}")
         except:
             pass
-    context.bot.sendMessage(chat_id, "Done")
+    msg.edit_text("Successfully refreshed all usernames!")
 
 
 def revoke(update, context):

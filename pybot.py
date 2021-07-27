@@ -12,12 +12,11 @@ import psycopg2 as psql
 
 # Defer
 from contextlib import ExitStack
-from functools import partial
 
-test = 'config.py' in os.listdir()
+dev = 'config.py' in os.listdir()
 BASE_AMOUNT = 0
 
-if test:
+if dev:
     from config import *
 else:
     TOKEN = os.environ['TELEGRAM_TOKEN']
@@ -30,7 +29,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 # database things
-con = psql.connect(DB_URL, sslmode='prefer' if test else 'require')
+con = psql.connect(DB_URL, sslmode='prefer' if dev else 'require')
 cur = con.cursor()
 
 
@@ -49,7 +48,7 @@ def main():
     dp.add_handler(CommandHandler('me', me))
     dp.add_handler(CommandHandler('addadmin', addadmin))
     dp.add_handler(CommandHandler('reset', reset))
-    dp.add_handler(CommandHandler('username', getusername))
+    dp.add_handler(CommandHandler('refreshusername', getusername))
     dp.add_handler(CommandHandler('display', display))
     dp.add_handler(CommandHandler('add', add))
     dp.add_handler(CommandHandler('help', help))
@@ -62,14 +61,14 @@ def main():
     dp.add_error_handler(error)
 
     # Set Webhook
-    if test:
+    if dev:
         updater.start_polling()
     else:
         updater.start_webhook(
             listen='0.0.0.0',
             port=PORT,
             url_path=TOKEN,
-            webhook_url='https://soccash-bot.herokuapp.com/' + TOKEN
+            webhook_url='https://socash-bot.herokuapp.com/' + TOKEN
         )
     # updater.bot.sendMessage(ic1_id, 'Up and running!') # got too annoying
     with ExitStack() as stack:

@@ -1,8 +1,10 @@
 import psycopg2 as psql
 from pybot import cur, con, logger, BASE_AMOUNT
+from config import mychatid, myusername
 
 
 def resetdb(update=None, context=None):
+    # create/reset database
     try:
         cur.execute(f"""
             DROP TABLE IF EXISTS users;
@@ -10,8 +12,9 @@ def resetdb(update=None, context=None):
             DROP TABLE IF EXISTS house;
 
             CREATE TABLE users (
-                chat_id INTEGER NOT NULL PRIMARY KEY UNIQUE
-                role INTEGER DEFAULT 0
+                chat_id INTEGER NOT NULL PRIMARY KEY UNIQUE,
+                role INTEGER DEFAULT 0,
+                username TEXT
             );
 
             CREATE TABLE og (
@@ -25,6 +28,15 @@ def resetdb(update=None, context=None):
                 name TEXT UNIQUE
             );
 
+            CREATE TABLE logs (
+                id SERIAL NOT NULL PRIMARY KEY,
+                chat_id INTEGER NOT NULL,
+                og_id INTEGER,
+                house_id INTEGER,
+                amount INTEGER NOT NULL,
+                time TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+
             INSERT INTO house VALUES (1, 'Ilent');
             INSERT INTO house VALUES (2, 'Barg');
             INSERT INTO house VALUES (3, 'Etlas');
@@ -35,11 +47,11 @@ def resetdb(update=None, context=None):
             INSERT INTO
                 users (chat_id)
             VALUES
-                (129464681);
+                ({mychatid});
         """)
 
-        for house_id in range(1, 7):
-            for og_id in range(1, 7):
+        for house_id in range(1, 7):  # Edit accordingly to how many houses you have
+            for og_id in range(1, 7):  # Edit accoridngly to how many OGs per house you have
                 cur.execute(f"""
                     INSERT INTO
                         og (id, house_id)
@@ -48,7 +60,7 @@ def resetdb(update=None, context=None):
                 """)
     except Exception as e:
         con.rollback()
-        raise e
+        raise e  # to throw an error so the logger will log. otherwise unnecessary
 
 
 def resetpoints():
@@ -57,8 +69,12 @@ def resetpoints():
 
 
 def legitUser(chat_id):
-    cur.execute(f"SELECT * FROM users WHERE chat_id = {chat_id}")
-    return cur.fetchone() is not None
+    cur.execute(f"SELECT role FROM users WHERE chat_id = {chat_id}")
+    role = cur.fetchone()
+    if role is None:
+        return None
+    role = role[0]
+    return {0: "OComm", 1: "Station Master"}
 
 
 def isOComm(chat_id):
@@ -168,6 +184,6 @@ def revokeAdmin(idList):
     if cur.fetchall() is None:
         # as a precautionary measure
         cur.execute(
-            '''INSERT INTO users (chat_id, username) VALUES (129464681, 'zhekaiiii')''')
+            f'''INSERT INTO users (chat_id, username) VALUES ({mychatid}, '{myusername}')''')
     con.commit()
     return revoked
