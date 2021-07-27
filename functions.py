@@ -1,9 +1,7 @@
 # Telegram
-from collections import UserList
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
-from telegram.ext import Updater, Filters, CommandHandler, MessageHandler, CallbackQueryHandler, CallbackContext
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ParseMode
 from db import *
-from pybot import BASE_AMOUNT, logger, cur, con
+from pybot import BASE_AMOUNT, cur
 import datetime
 
 
@@ -32,7 +30,7 @@ def button(update, context):
     elif callback_data.startswith('disp'):
         context.bot.edit_message_text(
             'Loading... Please wait.', chat_id, message_id)
-        txt = '<u>Amount of SOCCash</u>'
+        txt = '<u>Amount of SOCash</u>'
         mode = callback_data[4:]
         pointslist = getPoints(mode=mode)
         if mode == 'house':
@@ -69,7 +67,7 @@ def button(update, context):
             pass
         addUser(id, ocomm, username)
         msg.edit_text(
-            f'Done! @{context.bot.getChat(id).username} is now a{"n admin" if ocomm else " station master"}!')
+            f'Done! @{context.bot.getChat(id).username} is now a registered {"OComm" if ocomm else "Station Master"}!')
     elif callback_data.startswith('revoke'):
         msg = context.bot.edit_message_text(
             'Revoking, please hold on...', chat_id, message_id)
@@ -111,7 +109,7 @@ def start(update, context):
             chat_id, f'Hi, {full_name(user)}. You are an {"authorized user. To add others as admin, you can forward their message to me or use the /addadmin command" if ocomm else "station master"}. View /help for more.')
     else:
         context.bot.sendMessage(
-            chat_id, 'Welcome to the SOCCash bot! To be added as an admin, type /me to get your user id and then send that to an existing admin, or you can get an exiting admin to forward a message by you to me.')
+            chat_id, 'Welcome to the SOCash bot! To be added as an admin, type /me to get your user id and then send that to an existing admin, or you can get an exiting admin to forward a message by you to me.')
 
 
 def me(update, context):
@@ -175,7 +173,7 @@ def factoryreset(update, context):
         ]
     ])
     context.bot.sendMessage(
-        chat_id, 'Are you sure you want to reset all SOCCash amounts to 0 and remove all authorized users?', reply_markup=markup)
+        chat_id, 'Are you sure you want to reset all SOCash amounts to 0 and remove all authorized users?', reply_markup=markup)
 
 
 def display(update, context):
@@ -265,12 +263,12 @@ def help(update, context):
     txt += '/me - Sends you your user id. Required to add as admin\n\n'
     txt += '/addadmin <u>userid(s)</u> - Adds the following user(s) as an admin. Separate user ids with a space\n\n' if OComm else ''
     txt += '/revoke <u>usernames/user ids</u> - Revokes admin privilegs from the following people. Unlike /addadmin, this works with usernames\n\n' if OComm else ''
-    txt += '/add <u>OG(s)</u> <u>amount</u> - Adds the specified amount of SOCCash to the OG(s) specified. Works for one or more OGs at a time.\n'
+    txt += '/add <u>OG(s)</u> <u>amount</u> - Adds the specified amount of SOCash to the OG(s) specified. Works for one or more OGs at a time.\n'
     txt += 'e.g. If you want to add $10 to Aikon 3 and Barg 2, type /add A3 B2 10. Upper/Lowercase does not matter.\n\n'
-    txt += '/massadd <u>amount</u> - Adds the specified amount of SOCCash to all OGs\n\n'
+    txt += '/massadd <u>amount</u> - Adds the specified amount of SOCash to all OGs\n\n'
     txt += '/display - Displays the scoreboard\n\n'
     txt += '/admins - Displays all admins\n\n' if OComm else ''
-    txt += '/reset - Resets the SOCCash amount to 0 for ALL OGs. USE WITH CAUTION!\n\n' if OComm else ''
+    txt += '/reset - Resets the SOCash amount to 0 for ALL OGs. USE WITH CAUTION!\n\n' if OComm else ''
     context.bot.sendMessage(chat_id, txt, parse_mode=ParseMode.HTML)
 
 
@@ -333,6 +331,9 @@ def forwarded(update, context):
 
 def getusername(update, context):
     chat_id = update.message.chat.id
+    user_id = update.message.from_user.id
+    if accessDenied(update, context) or not isOComm(user_id):
+        return
     msg = context.bot.sendMessage(
         chat_id, "Hold on, this might take very long...")
     idList = list(filter(lambda x: x[1] == None, getAdmins()))
@@ -410,7 +411,7 @@ def generate_logs(logs, context):
         un, og_id, house_id, amount, time = lg
         time = time.astimezone(datetime.timezone(datetime.timedelta(hours=8)))
         timestr = f"{time.day}/{time.month} {doubledigit(time.hour)}:{doubledigit(time.minute)}"
-        un = ('@' + un) if un else "Someone "
+        un = ('@' + un) if not isNumber(un) else un
         txt += f'{timestr} {un} {"added" if amount > 0 else "removed"} ${amount if amount > 0 else -amount} {"to" if amount > 0 else "from"} {"all OGs" if og_id is None and house_id is None else f"{getHouse(house_id)} {og_id}"}\n'
     return txt
 

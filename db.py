@@ -104,7 +104,7 @@ def getlogs(page=0):
     if count == 0:
         return [0, None]
     cur.execute(
-        f'''SELECT u.username, og_id, house_id, amount, time
+        f'''SELECT COALESCE (u.username, l.chat_id) AS user, og_id, house_id, amount, time
         FROM logs l
         LEFT JOIN users u ON u.chat_id = l.chat_id
         ORDER BY time
