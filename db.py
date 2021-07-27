@@ -75,7 +75,7 @@ def legitUser(chat_id):
     if role is None:
         return None
     role = role[0]
-    return {0: "OComm", 1: "Station Master"}
+    return {0: "OComm", 1: "Station Master"}[role]
 
 
 def isOComm(chat_id):
